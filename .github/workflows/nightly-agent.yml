@@ -87,3 +87,4 @@ jobs:
 # Q: What's wrong with: permissions: write-all ?
 # A: Violates least privilege. Always specify only what's needed.
 # ─────────────────────────────────────────────────────────────
+# lab3 ruleset test
