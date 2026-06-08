@@ -1,0 +1,89 @@
+# Lab 2: CI Workflow Invoking an Agent
+# EXAM DOMAIN 2 — Implement tool use & environment interaction
+#
+# Key patterns to recognize:
+# 1. Scheduled trigger (nightly run)
+# 2. Explicit, minimal permissions (least privilege)
+# 3. GITHUB_TOKEN (not a PAT) — avoids spawning recursive workflow runs
+# 4. --no-ask-user flag (non-interactive, safe for CI)
+
+name: Nightly Agent Task
+
+on:
+  # Runs at 9:00 AM UTC every day
+  schedule:
+    - cron: '0 9 * * *'
+  # Also allows manual trigger for testing
+  workflow_dispatch:
+
+# LEAST PRIVILEGE: only the permissions this workflow actually needs
+# contents: read  — to checkout and read the repo
+# pull-requests: write — to open/update PRs with agent output
+# NO: contents: write, NO: write-all, NO: admin
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  agent-task:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # GITHUB_TOKEN: injected at runtime, NOT stored in plaintext anywhere
+      # GITHUB_TOKEN actions generally don't trigger NEW workflow runs (loop prevention)
+      # A PAT or GitHub App token COULD trigger new runs — use only when needed
+      - name: Run agent task
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npx @github/copilot-cli \
+            -p "Summarize recent changes and open a PR with a summary report" \
+            --no-ask-user
+
+      # USING A CUSTOM AGENT (from .github/agents/):
+      # - name: Run security review agent
+      #   env:
+      #     COPILOT_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   run: |
+      #     npx @github/copilot-cli \
+      #       --agent security-reviewer \
+      #       -p "Review the latest commit for security issues" \
+      #       --no-ask-user
+
+      # UPLOAD ARTIFACTS: makes agent output inspectable (durable artifact)
+      # Enables traceability: "which run produced this, against what code state?"
+      - name: Upload agent output as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-output-${{ github.run_id }}
+          path: agent-output.log
+          retention-days: 30
+
+# ─────────────────────────────────────────────────────────────
+# EXAM EXAM EXAM — patterns to know from this file:
+#
+# Q: How do you run an agent nightly in CI with least privilege?
+# A: schedule: cron + explicit minimal permissions block
+#
+# Q: Why use GITHUB_TOKEN instead of a PAT here?
+# A: GITHUB_TOKEN-triggered actions don't spawn new workflow runs (prevents loops)
+#    PATs/App tokens CAN trigger new runs — use only when cross-repo is needed
+#
+# Q: What does --no-ask-user do?
+# A: Makes the agent non-interactive (no prompts) — required for CI/automation
+#
+# Q: Why upload artifacts?
+# A: Durable artifacts = inspectable outputs, traceable to this run + commit
+#    This is how "observability" and "state persistence" are done in GitHub-native way
+#
+# Q: What's wrong with: permissions: write-all ?
+# A: Violates least privilege. Always specify only what's needed.
+# ─────────────────────────────────────────────────────────────
