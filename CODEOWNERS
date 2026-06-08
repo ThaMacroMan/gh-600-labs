@@ -10,39 +10,39 @@
 
 # ── DEFAULT: catch-all ──────────────────────────────────────────────
 # All files require review from at least one core team member
-*                               @your-org/core-team
+*                               @ThaMacroMan
 
 # ── APPLICATION CODE ────────────────────────────────────────────────
 # Standard PR + checks + ≥1 review (medium risk)
-/src/                           @your-org/core-team
-/lib/                           @your-org/core-team
-/tests/                         @your-org/core-team
+/src/                           @ThaMacroMan
+/lib/                           @ThaMacroMan
+/tests/                         @ThaMacroMan
 
 # ── AUTHENTICATION / SECURITY ────────────────────────────────────────
 # High risk: requires security team sign-off
-/src/auth/                      @your-org/security-team
-/src/auth/                      @your-org/core-team
+/src/auth/                      @ThaMacroMan
+/src/auth/                      @ThaMacroMan
 
 # ── INFRASTRUCTURE ───────────────────────────────────────────────────
 # HIGH RISK: CODEOWNERS + multiple reviews + stricter ruleset
 # Exam scenario: "ensure platform team reviews any infra changes"
-/infra/                         @your-org/platform-team
+/infra/                         @ThaMacroMan
 
 # ── GITHUB WORKFLOWS (critical path) ─────────────────────────────────
 # Workflows can grant themselves elevated permissions — high risk
 # ALWAYS require platform team review on workflow changes
-/.github/workflows/             @your-org/platform-team
+/.github/workflows/             @ThaMacroMan
 
 # ── AGENT CONFIGURATION ──────────────────────────────────────────────
 # Changes to agent files or MCP config = governance-sensitive
 # (expanding agent tools increases blast radius)
-/.github/agents/                @your-org/platform-team
-/.github/hooks/                 @your-org/platform-team
+/.github/agents/                @ThaMacroMan
+/.github/hooks/                 @ThaMacroMan
 
 # ── PRODUCTION CONFIG ────────────────────────────────────────────────
 # Critical: agent prepares, environment approval gates execution
-/config/production*             @your-org/platform-team
-/config/production*             @your-org/security-team
+/config/production*             @ThaMacroMan
+/config/production*             @ThaMacroMan
 
 # ─────────────────────────────────────────────────────────────────────
 # EXAM NOTES:
