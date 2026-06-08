@@ -1,0 +1,28 @@
+{
+  "hooks": [
+    {
+      "name": "block-dangerous-tools",
+      "description": "Blocks destructive tool calls before they execute — enforcement independent of model reasoning",
+      "trigger": "pre-tool-use",
+      "run": "if [[ \"$TOOL\" == \"delete_file\" || \"$TOOL\" == \"delete_directory\" || \"$TOOL\" == \"drop_table\" ]]; then echo 'BLOCKED: Destructive tool call denied by policy'; exit 1; fi"
+    },
+    {
+      "name": "block-production-writes",
+      "description": "Prevents any write to production config paths without explicit authorization",
+      "trigger": "pre-tool-use",
+      "run": "if [[ \"$TOOL\" == *\"write\"* ]] && [[ \"$TOOL_ARGS\" == *\"config/production\"* ]]; then echo 'BLOCKED: Production writes require environment approval'; exit 1; fi"
+    },
+    {
+      "name": "audit-all-tool-calls",
+      "description": "Logs every tool call for traceability — fires AFTER the tool executes",
+      "trigger": "post-tool-use",
+      "run": "echo \"[AUDIT] Tool: $TOOL | Args: $TOOL_ARGS | Result: $TOOL_RESULT | Run: $GITHUB_RUN_ID\" >> /tmp/agent-audit.log"
+    },
+    {
+      "name": "escalate-on-tool-error",
+      "description": "Captures tool failures and triggers escalation — fires on error",
+      "trigger": "error",
+      "run": "echo \"[ERROR] Tool: $TOOL failed. Error: $ERROR_MESSAGE. Run: $GITHUB_RUN_ID\" >> /tmp/agent-errors.log && gh issue comment $GITHUB_PR_NUMBER --body \"⚠️ Agent tool failure: $TOOL — $ERROR_MESSAGE. Escalating for human review.\""
+    }
+  ]
+}

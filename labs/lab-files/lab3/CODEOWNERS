@@ -1,0 +1,63 @@
+# Lab 3: CODEOWNERS
+# EXAM DOMAIN 1 & 6 — Enforcement vs Guidance
+#
+# CODEOWNERS + required reviews via rulesets = ENFORCEMENT
+# Agent instructions saying "don't touch infra/" = GUIDANCE (weak)
+#
+# This file lives at: CODEOWNERS (repo root), .github/CODEOWNERS, or docs/CODEOWNERS
+# GitHub uses the first match (most specific wins from bottom to top in some contexts)
+# Usually: place at repo root or .github/
+
+# ── DEFAULT: catch-all ──────────────────────────────────────────────
+# All files require review from at least one core team member
+*                               @your-org/core-team
+
+# ── APPLICATION CODE ────────────────────────────────────────────────
+# Standard PR + checks + ≥1 review (medium risk)
+/src/                           @your-org/core-team
+/lib/                           @your-org/core-team
+/tests/                         @your-org/core-team
+
+# ── AUTHENTICATION / SECURITY ────────────────────────────────────────
+# High risk: requires security team sign-off
+/src/auth/                      @your-org/security-team
+/src/auth/                      @your-org/core-team
+
+# ── INFRASTRUCTURE ───────────────────────────────────────────────────
+# HIGH RISK: CODEOWNERS + multiple reviews + stricter ruleset
+# Exam scenario: "ensure platform team reviews any infra changes"
+/infra/                         @your-org/platform-team
+
+# ── GITHUB WORKFLOWS (critical path) ─────────────────────────────────
+# Workflows can grant themselves elevated permissions — high risk
+# ALWAYS require platform team review on workflow changes
+/.github/workflows/             @your-org/platform-team
+
+# ── AGENT CONFIGURATION ──────────────────────────────────────────────
+# Changes to agent files or MCP config = governance-sensitive
+# (expanding agent tools increases blast radius)
+/.github/agents/                @your-org/platform-team
+/.github/hooks/                 @your-org/platform-team
+
+# ── PRODUCTION CONFIG ────────────────────────────────────────────────
+# Critical: agent prepares, environment approval gates execution
+/config/production*             @your-org/platform-team
+/config/production*             @your-org/security-team
+
+# ─────────────────────────────────────────────────────────────────────
+# EXAM NOTES:
+#
+# CODEOWNERS alone is NOT enough — you must ALSO:
+# 1. Enable "Require review from Code Owners" in branch protection / ruleset
+# 2. Enable "Require pull request before merging"
+# Without the ruleset, CODEOWNERS is just a suggestion.
+#
+# Autonomy levels (from study guide):
+# Low risk (docs/)      → automerge after required checks pass
+# Medium (src/, deps)   → PR + checks + ≥1 review
+# High (infra/, .github/workflows/) → CODEOWNERS + multiple reviews + stricter ruleset
+# Critical (prod, secrets) → environment approvals; agent prepares, human approves
+#
+# Exam trap: "Tell the agent in instructions not to touch /infra/"
+# Correct:   CODEOWNERS + required reviews + ruleset on /infra/
+# ─────────────────────────────────────────────────────────────────────
